@@ -47,8 +47,8 @@ So we changed the architecture instead of the prompt.
 
 ```
 user turn
-  ├─ Decider 2B (local GPU, p50 331 ms)  ->  P(emergency), P(escalating)  [tone + escalation]
-  ├─ Bedrock safety check (p50 1012 ms)  ->  needs crisis resources now?  [safety]
+  ├─ Decider 2B (local GPU, p50 159-335 ms)  ->  P(emergency), P(escalating)  [tone + escalation]
+  ├─ Bedrock safety check (p50 1064 ms)      ->  needs crisis resources now?  [safety]
   └─ OR of four signals -> crisis | check_in | calm -> Bedrock writes the reply
 ```
 
@@ -86,8 +86,8 @@ RTX 4060 Ti 16 GB (CUDA), Python 3.13.5, torch 2.11.0+cu128.** Decider served lo
 
 | | Decider 2B (local) | Bedrock LLM |
 |---|---|---|
-| latency p50 | **335 ms** | 781 ms |
-| latency p95 | **377 ms** | 2124 ms |
+| latency p50 | **160 ms** | 846 ms |
+| latency p95 | **170 ms** | 1011 ms |
 | correct | 19/22 | **22/22** |
 | crisis recall | 6/8 | **8/8** |
 | API cost | $0 (runs on our GPU) | see below |
@@ -95,7 +95,7 @@ RTX 4060 Ti 16 GB (CUDA), Python 3.13.5, torch 2.11.0+cu128.** Decider served lo
 Agreement between the two: **86.4% (19/22)**.
 
 The **safety check** used in the pipeline is a longer prompt than the benchmark's bare
-classifier, so it is slower: **p50 1012 ms, p95 1824 ms** over the 22 fixtures (256 input /
+classifier, so it is slower: **p50 1064 ms, p95 1813 ms** over the 22 fixtures (256 input /
 46 output tokens per call). The benchmark above is the like-for-like comparison; the safety
 check's own figures are what the running agent actually pays.
 
@@ -198,7 +198,7 @@ the Strands `BedrockModel` wrapper.
 - Thresholds (`CRISIS_HIGH=0.30`, `CRISIS_LOW=0.15`, `CRISIS_ESC=0.70`) control **tone only**.
   They are not a safety boundary; the OR is.
 - Cost figures are intentionally absent until a live pricing page is read.
-- The safety check adds **p50 1012 ms / p95 1824 ms**, and the turn's total is that plus
+- The safety check adds **p50 1064 ms / p95 1813 ms**, and the turn's total is that plus
   Decider's ~331 ms and the reply generation. That latency is the price of not letting a
   compressed probability decide whether someone gets help; a production system would run the
   gate concurrently with the tone decision.

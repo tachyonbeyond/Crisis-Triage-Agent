@@ -131,10 +131,10 @@ State this plainly, because it is easy to design around the wrong mental model:
   checker is configured. The gate is not a rare second opinion; it is part of the loop, and it
   costs one Bedrock call per turn. Decider does **not** save latency or cost on the safety
   decision.
-- Measured on 22 fixtures: the local model is **~335 ms p50** (2 questions; a quieter sweep
-  measured 165 ms — see GROUND_TRUTH §3), and the **pipeline safety gate is 1012 ms p50 /
-  1824 ms p95**. The 780 ms p50 figure sometimes quoted for Bedrock is the *benchmark
-  classifier*, which uses a much shorter prompt than the safety gate.
+- Measured on 22 fixtures: the local model's p50 ranges from **159 to 335 ms** across runs of
+  identical code (see GROUND_TRUTH §3); plan with ~335 ms. The **pipeline safety gate is
+  1064 ms p50 / 1813 ms p95**. The ~780–846 ms p50 figure sometimes quoted for Bedrock is the
+  *benchmark classifier*, which uses a much shorter prompt than the safety gate.
 - What the local model buys is a cheap, local, per-turn **tone and escalation** signal that
   decides how the reply is framed — not a way to skip the gate. A design that used it as a
   pre-filter to skip the safety call exists only as an untested hypothesis in our notes; we did
