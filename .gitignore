@@ -7,3 +7,8 @@ __pycache__/
 CLAUDE.md
 docs/HACKATHON.md
 docs/DECIDER.md
+# build artefacts
+*.egg-info/
+build/
+dist/
+results/*.local.json

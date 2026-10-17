@@ -1,0 +1,1 @@
+"""Amazon Bedrock: the safety check and the two response styles."""

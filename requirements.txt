@@ -1,0 +1,22 @@
+# Pinned from the verified environment: Python 3.13.5, Windows 11, RTX 4060 Ti 16 GB.
+#
+# torch MUST be the CUDA build and must be installed FIRST, from the PyTorch index:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+# A plain `pip install torch` on Windows yields a CPU-only build; the Decider server
+# would then be far slower and the benchmark numbers would not be comparable.
+# Confirm with: python -c "import torch; print(torch.cuda.is_available())"
+#
+# strands-decider pulls its own torch/transformers requirements -- after installing
+# it, run `pip list` and check torch still ends in +cu128.
+accelerate==1.15.0
+boto3==1.43.114
+fastapi==0.143.3
+numpy==2.5.4
+pytest==9.1.1
+python-dotenv==1.2.4
+requests==2.34.2
+strands-agents==1.61.1
+strands-decider==0.1.0
+torch==2.11.0+cu128
+transformers==5.20.1
+uvicorn==0.54.0
