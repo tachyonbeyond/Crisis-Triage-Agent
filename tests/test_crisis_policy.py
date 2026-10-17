@@ -115,14 +115,26 @@ def test_guidance_is_route_specific(fake_client, fake_safety):
     policy = build(fake_client, fake_safety)
 
     fake_safety.emergency = True
-    assert "crisis resources" in policy.triage(["x"]).guidance.lower()
+    crisis = policy.triage(["x"]).guidance.lower()
+    # The crisis directive must ask about safety now, require one concrete step, and
+    # forbid describing methods/quantities. It must NOT ask for the support line:
+    # code appends that.
+    assert "safe right now" in crisis
+    assert "exactly one concrete step" in crisis
+    assert "methods, quantities" in crisis
+    assert "support line is appended" in crisis
 
     fake_safety.emergency = False
     fake_client.emergency = 0.20  # mid band -> check-in
-    assert "one gentle" in policy.triage(["x"]).guidance.lower()
+    check_in = policy.triage(["x"]).guidance.lower()
+    assert "one gentle" in check_in
+    assert "safe right now" in check_in
 
     fake_client.emergency = 0.05  # low band -> calm
-    assert "never dismiss" in policy.triage(["x"]).guidance.lower()
+    calm = policy.triage(["x"]).guidance.lower()
+    assert "do not mention crisis resources" in calm
+    assert "practical options" in calm
+    assert "append" in calm
 
 
 def test_explain_is_safe_to_print(fake_client, fake_safety):

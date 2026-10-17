@@ -37,7 +37,11 @@ def test_bedrock_safety_forces_a_crisis_reply(fake_client, fake_safety, fake_res
     fake_safety.emergency = True
     result = build_agent(fake_client, fake_safety, fake_responder).turn("I have the pills ready")
     assert result.route is Route.CRISIS
-    assert result.reply == "[crisis] reply"
+    assert result.reply.startswith("[crisis] reply")
+    # The crisis route always carries the support line, whichever responder renders it.
+    from crisis_triage.resources import US_SUPPORT_LINE
+
+    assert US_SUPPORT_LINE in result.reply
     assert fake_responder.calls[-1][1] == "crisis"
 
 

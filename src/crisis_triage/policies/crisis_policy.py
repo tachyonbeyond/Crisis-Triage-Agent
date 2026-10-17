@@ -63,25 +63,40 @@ class TriageOutcome:
 
     @property
     def guidance(self) -> str:
-        """The directive injected into the agent's context. Internal, not user-facing."""
+        """The directive injected into the agent's context. Internal, not user-facing.
+
+        The support line is appended by code after generation, so these directives must
+        NOT ask the model to produce it -- and the calm one must actively keep crisis
+        resources out of an ordinary reply.
+        """
         if self.route is Route.CRISIS:
             return (
-                "SAFETY ROUTING: this turn has been classified as needing crisis resources now. "
-                "Reply briefly: acknowledge in one sentence, give exactly one concrete next step, "
-                "and include the crisis support line given in your instructions. Do not ask them "
-                "to explain themselves. Do not be cheerful."
+                "SAFETY ROUTING: this turn needs an immediate safety response. Stay with the "
+                "person: acknowledge in one neutral sentence without repeating what they "
+                "described, ask directly whether they are safe right now, and give exactly ONE "
+                "concrete step they can take immediately (for example putting distance between "
+                "themselves and what they mentioned, and contacting help). Three or four "
+                "sentences, no lists. Never introduce or describe methods, quantities or "
+                "effects; if they mentioned one, refer to it only as 'what you mentioned'. "
+                "Do not ask them to explain themselves and do not be cheerful. Do not add a "
+                "phone number or link: the support line is appended after your reply."
             )
         if self.route is Route.CHECK_IN:
             return (
-                "SAFETY ROUTING: no immediate emergency was detected, but the situation is unclear. "
-                "Reply warmly in one or two sentences, then ask exactly ONE gentle, direct question "
-                "that would reveal whether they are safe right now. Keep the support line visible. "
-                "Do not give advice yet."
+                "SAFETY ROUTING: no immediate emergency was detected, but the situation is "
+                "unclear. Reply warmly in two or three sentences, then ask exactly ONE gentle, "
+                "direct question about whether they are safe right now -- for example whether "
+                "they are having thoughts of hurting themselves, or whether they are safe "
+                "tonight. Do not give advice yet. Do not add a phone number or link: the support "
+                "line is appended after your reply."
             )
         return (
-            "SAFETY ROUTING: no immediate emergency was detected. Reply warmly, reflect what they "
-            "said, and offer one or two options rather than instructions. Keep the support line "
-            "visible. Never dismiss their distress."
+            "SAFETY ROUTING: no immediate emergency was detected and this reads as an ordinary "
+            "hard day. Reply warmly in two or three sentences: reflect what they said and offer "
+            "one or two practical options, phrased as options rather than instructions. Do not "
+            "mention crisis resources, hotlines, the emergency number or links -- they are "
+            "appended by code only when the message calls for them. Do not dismiss their day "
+            "and do not moralise."
         )
 
     def explain(self) -> str:
