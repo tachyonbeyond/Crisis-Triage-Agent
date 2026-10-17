@@ -48,14 +48,14 @@
   },
   "latency": {
     "server_ms": {
-      "p50": 165.0,
-      "p95": 177.63,
-      "min": 157.35,
-      "max": 181.74
+      "p50": 331.46,
+      "p95": 344.16,
+      "min": 318.54,
+      "max": 356.05
     },
     "wall_ms": {
-      "p50": 178.28,
-      "p95": 197.66
+      "p50": 335.2,
+      "p95": 357.72
     },
     "input_tokens": {
       "min": 443,
@@ -88,8 +88,8 @@
       },
       "urgency_confidence": 0.4363,
       "input_tokens": 447,
-      "server_latency_ms": 165.25,
-      "wall_latency_ms": 190.44,
+      "server_latency_ms": 344.2,
+      "wall_latency_ms": 365.53,
       "ok": true
     },
     {
@@ -117,8 +117,8 @@
       },
       "urgency_confidence": 0.5382,
       "input_tokens": 443,
-      "server_latency_ms": 166.78,
-      "wall_latency_ms": 189.44,
+      "server_latency_ms": 328.77,
+      "wall_latency_ms": 344.19,
       "ok": true
     },
     {
@@ -146,8 +146,8 @@
       },
       "urgency_confidence": 0.5154,
       "input_tokens": 448,
-      "server_latency_ms": 162.59,
-      "wall_latency_ms": 185.69,
+      "server_latency_ms": 333.04,
+      "wall_latency_ms": 334.79,
       "ok": true
     },
     {
@@ -175,8 +175,8 @@
       },
       "urgency_confidence": 0.4528,
       "input_tokens": 447,
-      "server_latency_ms": 181.74,
-      "wall_latency_ms": 206.67,
+      "server_latency_ms": 327.37,
+      "wall_latency_ms": 329.54,
       "ok": true
     },
     {
@@ -204,8 +204,8 @@
       },
       "urgency_confidence": 0.4933,
       "input_tokens": 451,
-      "server_latency_ms": 165.33,
-      "wall_latency_ms": 167.22,
+      "server_latency_ms": 329.96,
+      "wall_latency_ms": 331.71,
       "ok": true
     },
     {
@@ -233,8 +233,8 @@
       },
       "urgency_confidence": 0.5418,
       "input_tokens": 450,
-      "server_latency_ms": 160.9,
-      "wall_latency_ms": 173.13,
+      "server_latency_ms": 318.54,
+      "wall_latency_ms": 335.61,
       "ok": true
     },
     {
@@ -262,8 +262,8 @@
       },
       "urgency_confidence": 0.4698,
       "input_tokens": 449,
-      "server_latency_ms": 164.37,
-      "wall_latency_ms": 176.96,
+      "server_latency_ms": 333.91,
+      "wall_latency_ms": 335.86,
       "ok": true
     },
     {
@@ -291,8 +291,8 @@
       },
       "urgency_confidence": 0.4868,
       "input_tokens": 447,
-      "server_latency_ms": 167.01,
-      "wall_latency_ms": 168.56,
+      "server_latency_ms": 329.75,
+      "wall_latency_ms": 332.22,
       "ok": true
     },
     {
@@ -320,8 +320,8 @@
       },
       "urgency_confidence": 0.5221,
       "input_tokens": 446,
-      "server_latency_ms": 168.22,
-      "wall_latency_ms": 192.39,
+      "server_latency_ms": 329.41,
+      "wall_latency_ms": 331.72,
       "ok": true
     },
     {
@@ -349,8 +349,8 @@
       },
       "urgency_confidence": 0.5045,
       "input_tokens": 449,
-      "server_latency_ms": 165.7,
-      "wall_latency_ms": 181.39,
+      "server_latency_ms": 330.86,
+      "wall_latency_ms": 333.39,
       "ok": true
     },
     {
@@ -378,8 +378,8 @@
       },
       "urgency_confidence": 0.4912,
       "input_tokens": 448,
-      "server_latency_ms": 158.08,
-      "wall_latency_ms": 179.59,
+      "server_latency_ms": 338.4,
+      "wall_latency_ms": 340.94,
       "ok": true
     },
     {
@@ -407,8 +407,8 @@
       },
       "urgency_confidence": 0.4207,
       "input_tokens": 448,
-      "server_latency_ms": 177.91,
-      "wall_latency_ms": 192.31,
+      "server_latency_ms": 331.36,
+      "wall_latency_ms": 333.94,
       "ok": true
     },
     {
@@ -436,8 +436,8 @@
       },
       "urgency_confidence": 0.4693,
       "input_tokens": 453,
-      "server_latency_ms": 172.38,
-      "wall_latency_ms": 197.73,
+      "server_latency_ms": 356.05,
+      "wall_latency_ms": 358.35,
       "ok": true
     },
     {
@@ -465,8 +465,8 @@
       },
       "urgency_confidence": 0.4931,
       "input_tokens": 445,
-      "server_latency_ms": 161.6,
-      "wall_latency_ms": 163.0,
+      "server_latency_ms": 334.01,
+      "wall_latency_ms": 336.28,
       "ok": true
     },
     {
@@ -494,8 +494,8 @@
       },
       "urgency_confidence": 0.4686,
       "input_tokens": 445,
-      "server_latency_ms": 157.35,
-      "wall_latency_ms": 159.17,
+      "server_latency_ms": 332.6,
+      "wall_latency_ms": 335.6,
       "ok": true
     },
     {
@@ -523,8 +523,8 @@
       },
       "urgency_confidence": 0.5353,
       "input_tokens": 446,
-      "server_latency_ms": 159.62,
-      "wall_latency_ms": 161.15,
+      "server_latency_ms": 331.55,
+      "wall_latency_ms": 333.74,
       "ok": true
     },
     {
@@ -552,8 +552,8 @@
       },
       "urgency_confidence": 0.5252,
       "input_tokens": 449,
-      "server_latency_ms": 162.33,
-      "wall_latency_ms": 163.93,
+      "server_latency_ms": 328.87,
+      "wall_latency_ms": 331.48,
       "ok": true
     },
     {
@@ -581,8 +581,8 @@
       },
       "urgency_confidence": 0.4875,
       "input_tokens": 448,
-      "server_latency_ms": 162.27,
-      "wall_latency_ms": 164.03,
+      "server_latency_ms": 330.09,
+      "wall_latency_ms": 332.43,
       "ok": true
     },
     {
@@ -610,8 +610,8 @@
       },
       "urgency_confidence": 0.497,
       "input_tokens": 473,
-      "server_latency_ms": 170.85,
-      "wall_latency_ms": 196.38,
+      "server_latency_ms": 328.05,
+      "wall_latency_ms": 331.14,
       "ok": true
     },
     {
@@ -639,8 +639,8 @@
       },
       "urgency_confidence": 0.4288,
       "input_tokens": 465,
-      "server_latency_ms": 164.75,
-      "wall_latency_ms": 166.36,
+      "server_latency_ms": 343.31,
+      "wall_latency_ms": 345.68,
       "ok": true
     },
     {
@@ -668,8 +668,8 @@
       },
       "urgency_confidence": 0.4732,
       "input_tokens": 473,
-      "server_latency_ms": 168.21,
-      "wall_latency_ms": 169.74,
+      "server_latency_ms": 336.42,
+      "wall_latency_ms": 339.24,
       "ok": true
     },
     {
@@ -697,8 +697,8 @@
       },
       "urgency_confidence": 0.477,
       "input_tokens": 468,
-      "server_latency_ms": 164.39,
-      "wall_latency_ms": 188.19,
+      "server_latency_ms": 334.53,
+      "wall_latency_ms": 336.87,
       "ok": true
     }
   ]
