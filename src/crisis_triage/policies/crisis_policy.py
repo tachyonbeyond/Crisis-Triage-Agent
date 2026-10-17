@@ -194,6 +194,9 @@ def _make_handler_class():
         ) -> None:
             self.policy = policy
             self._name = name
+            # The outcome this handler actually used, so callers can report the real
+            # decision instead of recomputing a second one that might differ.
+            self.last_outcome: TriageOutcome | None = None
 
         @property
         def name(self) -> str:  # required by InterventionHandler
@@ -210,6 +213,7 @@ def _make_handler_class():
 
             state = "\n".join(f"USER: {t}" for t in turns[-self.policy.band_policy.max_turns :])
             outcome = self.policy.triage_state(state, turns)
+            self.last_outcome = outcome
             event.invocation_state[_INVOCATION_KEY] = outcome
             return Proceed()
 
