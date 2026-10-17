@@ -168,8 +168,17 @@ def main() -> int:
                 "safety_emergency": None if safety is None else safety.emergency,
                 "safety_reason": None if safety is None else safety.reason,
                 "safety_latency_ms": None if safety is None else safety.latency_ms,
+                # Exactly what left this process. `decider_state` is the string the
+                # band policy built and sent to Decider; `safety_state` is what the
+                # handler passed to the Bedrock safety check. They are recorded
+                # separately because they are separate requests and can differ.
+                "decider_state": band_decision.state,
+                "decider_questions": band_decision.questions,
+                "safety_state": getattr(outcome, "safety_state", None),
             }
             print(f"         DECISION: {outcome.explain()}")
+            if band_decision.state is not None:
+                print(f"         DECIDER STATE: {band_decision.state!r}")
         print(f"         REPLY: {reply.strip()}\n")
         turns.append(turn)
 

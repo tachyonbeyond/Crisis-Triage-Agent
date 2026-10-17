@@ -239,6 +239,57 @@ def test_constructing_an_agent_makes_no_network_call(fake_client, fake_safety):
     assert fake_safety.calls == []
 
 
+def test_handler_scores_the_whole_conversation_not_just_the_latest_message(fake_client, fake_safety):
+    """Regression: `event.messages` is only the current prompt in the real loop.
+
+    Reading it alone meant every turn after the first was triaged against a single
+    message, so earlier turns never reached Decider and the escalation question had
+    nothing to compare. Assert on the state the client actually received.
+    """
+    fake_client.emergency = 0.07
+    fake_safety.emergency = False
+    handler = crisis_intervention_handler(_policy(fake_client, fake_safety))
+    agent = Agent(model=FakeModel(), interventions=[handler], callback_handler=None)
+
+    agent("my manager piled three deadlines on me today")
+    agent("I am really struggling and I do not know how much longer I can keep going")
+
+    last_state = fake_client.calls[-1]["state"]
+    assert "deadlines" in last_state, "turn 1 is missing from the state sent on turn 2"
+    assert "struggling" in last_state
+    # Oldest first, so the escalation question has a chronological comparison.
+    assert last_state.index("deadlines") < last_state.index("struggling")
+    # Our own injected directives must never be read back as user turns.
+    assert "SAFETY ROUTING" not in last_state
+
+
+def test_injected_guidance_is_not_treated_as_user_text(fake_client, fake_safety):
+    fake_client.emergency = 0.07
+    fake_safety.emergency = False
+    handler = crisis_intervention_handler(_policy(fake_client, fake_safety))
+    agent = Agent(model=FakeModel(), interventions=[handler], callback_handler=None)
+
+    agent("first real message")
+    agent("second real message")
+    agent("third real message")
+
+    state = fake_client.calls[-1]["state"]
+    assert state.count("SAFETY ROUTING") == 0
+    assert state.startswith("USER: first real message")
+
+
+def test_decider_and_safety_receive_the_same_state(fake_client, fake_safety):
+    """One request shape: what we log for Decider is what the safety check got."""
+    fake_client.emergency = 0.07
+    fake_safety.emergency = False
+    handler = crisis_intervention_handler(_policy(fake_client, fake_safety))
+    agent = Agent(model=FakeModel(), interventions=[handler], callback_handler=None)
+    agent("only message")
+
+    assert fake_client.calls[-1]["state"] == fake_safety.calls[-1]
+    assert handler.last_outcome.safety_state == handler.last_outcome.band.state
+
+
 @pytest.mark.parametrize("route_kind", ["calm", "check_in", "crisis"])
 def test_guidance_differs_by_route(fake_client, fake_safety, route_kind):
     fake_client.emergency = {"calm": 0.05, "check_in": 0.20, "crisis": 0.40}[route_kind]

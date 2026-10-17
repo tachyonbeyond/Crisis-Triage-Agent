@@ -35,11 +35,18 @@ from typing import Any
 
 from ..bedrock.safety_check import SafetyChecker, SafetyVerdict
 from .confidence_band import BandPolicyError, ConfidenceBandPolicy, Decision, Route
+from .questions import build_state
 
 DEFAULT_ESC_THRESHOLD = 0.70
 
 # Key under which the triage outcome is parked in `event.invocation_state`.
 _INVOCATION_KEY = "crisis_triage"
+
+# The intervention registry injects accumulated guide feedback as a `role: "user"`
+# message prefixed with "[<handler name>] " (strands/interventions/registry.py:230).
+# Those are our own directives, never things the person said, and must not be read
+# back as user turns.
+_GUIDE_PREFIXES = ("[crisis_triage]",)
 
 
 def _env_float(name: str, default: float) -> float:
@@ -60,6 +67,10 @@ class TriageOutcome:
     band: Decision
     safety: SafetyVerdict | None = None
     triggered_by: list[str] = field(default_factory=list)
+    # The state string handed to the safety check. Recorded because it is a separate
+    # request from Decider's and is built by the caller of triage_state, so it can
+    # legitimately differ from `band.state`.
+    safety_state: str | None = None
 
     @property
     def guidance(self) -> str:
@@ -135,13 +146,21 @@ class CrisisTriagePolicy:
         )
 
     def triage(self, user_turns: list[str]) -> TriageOutcome:
-        state = "\n".join(f"USER: {t}" for t in user_turns[-self.band_policy.max_turns :])
+        state = build_state(user_turns, self.band_policy.max_turns)
         return self.triage_state(state, user_turns)
 
     def triage_state(self, state: str, user_turns: list[str] | None = None) -> TriageOutcome:
         """Triage an explicit state string (used by the handler, which has the messages)."""
         turns = user_turns or [state]
         band = self.band_policy.decide_or_fallback(turns)
+
+        # Use the state string the band policy actually built and sent. Deriving it
+        # twice produced two different strings for the same turn (a single turn was
+        # labelled "USER: ..." for the safety check but bare for Decider), which made
+        # the transcript ambiguous about what was really sent. One string, one request
+        # shape, exactly what gets logged.
+        if band.state is not None:
+            state = band.state
 
         safety = self.safety_checker.check(state) if self.safety_checker is not None else None
 
@@ -157,7 +176,13 @@ class CrisisTriagePolicy:
             triggered.append("bedrock_safety")
 
         route = Route.CRISIS if triggered else band.route
-        return TriageOutcome(route=route, band=band, safety=safety, triggered_by=triggered)
+        return TriageOutcome(
+            route=route,
+            band=band,
+            safety=safety,
+            triggered_by=triggered,
+            safety_state=state if safety is not None else None,
+        )
 
     def __repr__(self) -> str:
         return (
@@ -171,22 +196,33 @@ class CrisisTriagePolicy:
 # ---------------------------------------------------------------------------
 
 
-def _message_texts(messages: Any) -> list[str]:
-    """Extract user text from a Strands message list, tolerating both known shapes."""
+def _message_texts(messages: Any, *, skip_prefixes: tuple[str, ...] = ()) -> list[str]:
+    """Extract user text from a Strands message list, tolerating both known shapes.
+
+    `skip_prefix` drops messages that are not from the user at all. The intervention
+    registry injects guidance as a `role: "user"` message, so without this the routing
+    directive from an earlier turn would be read back as if the person had said it --
+    and would then be sent to Decider as part of `state`.
+    """
     out: list[str] = []
     for message in messages or []:
         if not isinstance(message, dict) or message.get("role") != "user":
             continue
         content = message.get("content")
         if isinstance(content, str):
-            out.append(content)
+            text = content
+        else:
+            chunks: list[str] = []
+            for block in content or []:
+                if isinstance(block, dict) and "text" in block:
+                    chunks.append(str(block["text"]))
+            text = " ".join(chunks)
+        text = text.strip()
+        if not text:
             continue
-        chunks: list[str] = []
-        for block in content or []:
-            if isinstance(block, dict) and "text" in block:
-                chunks.append(str(block["text"]))
-        if chunks:
-            out.append(" ".join(chunks))
+        if any(text.startswith(prefix) for prefix in skip_prefixes):
+            continue
+        out.append(text)
     return out
 
 
@@ -218,15 +254,33 @@ def _make_handler_class():
             return self._name
 
         def before_invocation(self, event):
-            """Triage once per turn and park the outcome in the invocation state."""
-            messages = getattr(event, "messages", None)
-            if messages is None:
-                messages = getattr(getattr(event, "agent", None), "messages", None)
-            turns = _message_texts(messages)
+            """Triage once per turn, against the whole conversation, and park it.
+
+            `event.messages` is the *current prompt only* in the real Agent loop, so
+            reading it alone meant every turn after the first was scored against a
+            single message -- the earlier turns never reached Decider and the
+            `escalating` question had nothing to compare. The conversation lives on
+            `event.agent.messages`; use that, and fall back to `event.messages` only
+            when there is no agent history (a direct handler call in a test).
+            """
+            agent_messages = getattr(getattr(event, "agent", None), "messages", None)
+            turns = _message_texts(agent_messages, skip_prefixes=_GUIDE_PREFIXES)
+            if not turns:
+                turns = _message_texts(getattr(event, "messages", None), skip_prefixes=_GUIDE_PREFIXES)
+            else:
+                # In the Agent loop `event.messages` is the current prompt, which is
+                # NOT yet on `agent.messages` when before_invocation runs -- combine
+                # them so the newest message is scored too, without double-counting.
+                current = _message_texts(
+                    getattr(event, "messages", None), skip_prefixes=_GUIDE_PREFIXES
+                )
+                for text in current:
+                    if text not in turns:
+                        turns.append(text)
             if not turns:
                 return Proceed()
 
-            state = "\n".join(f"USER: {t}" for t in turns[-self.policy.band_policy.max_turns :])
+            state = build_state(turns, self.policy.band_policy.max_turns)
             outcome = self.policy.triage_state(state, turns)
             self.last_outcome = outcome
             event.invocation_state[_INVOCATION_KEY] = outcome

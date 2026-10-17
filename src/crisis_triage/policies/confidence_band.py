@@ -58,6 +58,11 @@ class Decision:
     decider_latency_ms: float | None = None
     input_tokens: int = 0
     output_tokens: int = 0
+    # Exactly what was sent to Decider, recorded so a transcript can show why a turn
+    # scored the way it did. Kept verbatim: the state is what the conversation history
+    # contributes to every later turn, so it is the thing to audit.
+    state: str | None = None
+    questions: dict | None = None
 
     def explain(self) -> str:
         """One line for `--interactive`/`--demo` and for the logs."""
@@ -178,6 +183,8 @@ class ConfidenceBandPolicy:
             decider_latency_ms=response.latency_ms,
             input_tokens=response.input_tokens,
             output_tokens=response.output_tokens,
+            state=state,
+            questions=asked,
         )
 
     def decide_or_fallback(self, user_turns: list[str]) -> Decision:
@@ -189,6 +196,12 @@ class ConfidenceBandPolicy:
         try:
             return self.decide(user_turns)
         except (DeciderError, BandPolicyError) as exc:
+            # Record the request we attempted too: on an outage the state is still the
+            # thing that explains why this turn went to CRISIS.
+            try:
+                attempted_state = build_state(user_turns, self.max_turns)
+            except ValueError:
+                attempted_state = None
             return Decision(
                 route=Route.CRISIS,
                 probability=float("nan"),
@@ -196,6 +209,8 @@ class ConfidenceBandPolicy:
                 high=self.high,
                 question=self.question,
                 fallback_reason=f"{type(exc).__name__}: {exc}",
+                state=attempted_state,
+                questions=self.questions,
             )
 
     def __repr__(self) -> str:
