@@ -62,15 +62,18 @@ Shape notes for the client (confirmed against `.venv/Lib/site-packages/strands_d
 
 ## 3. Latency (measured, warm)
 
-| | server-reported | wall clock |
-|---|---|---|
-| p50 | 165.0 ms | 164.8 ms |
-| p95 | 177.6 ms | 173.4 ms |
-| min / max | 151.3 / 182.4 ms | 158.0 / 173.4 ms |
+Latency drifts with machine load even when the model is warm, so both figures are given and neither is adjusted:
 
-6 questions, 219–244 input tokens. The first call after serving started took **714 ms** (cold) — warm the model before
-timing anything. These are *our* numbers on a 4060 Ti; they are not comparable to the AWS figures quoted for a 3090 in
-`docs/DECIDER.md` §1.
+| context | n | p50 | p95 | min / max |
+|---|---|---|---|---|
+| 2 questions, isolated timing loop | 6 | 164.8 ms | 173.4 ms | 158.0 / 173.4 ms |
+| full 22-fixture sweep (4 questions) | 22 | 331.5 ms | 344.2 ms | 318.5 / 356.1 ms |
+| full 22-fixture sweep, first pass | 22 | 165.0 ms | 177.6 ms | 151.3 / 182.4 ms |
+| benchmark run, 22 cases (2+ questions) | 22 | 335.1 ms | 377.0 ms | — |
+
+Use **~335 ms p50** as the planning figure for a real turn; the 165 ms reading was taken on a quieter machine.
+The first call after serving starts took **714 ms** (cold) — warm the model before timing anything. These are *our*
+numbers on a 4060 Ti; they are not comparable to the AWS figures quoted for a 3090 in `docs/DECIDER.md` §1.
 
 ## 4. THE FINDING: Decider under-scores emergency risk, and no threshold or wording fixes it
 
@@ -132,9 +135,32 @@ Same 6 clear emergencies + the passive-ideation control, one Bedrock `converse` 
 | `em_chest_pain` | crisis | 0.8551 | **True** |
 | `edge_passive_ideation` | check_in | 0.1310 | **False** |
 
-7/7 correct. Latency **799–1226 ms** per call (vs Decider p50 165 ms), **98 input / 13 output tokens** per call.
+7/7 correct. Latency **799–1226 ms** per call, **98 input / 13 output tokens** per call.
+
+The **pipeline safety check** is a different, longer prompt and is measurably slower — measured over all 22 fixtures:
+
+| | p50 | p95 | min / max | tokens/call |
+|---|---|---|---|---|
+| safety check (`SafetyChecker`) | 1012 ms | 1824 ms | 705 / 2294 ms | 256 in / 46 out |
+
 Cost comparison must be computed in `scripts/benchmark.py` from real token counts and cited Bedrock pricing — not
-asserted here.
+asserted here. The benchmark reports `cost: null` unless prices are supplied on the command line.
+
+## 5b. Full-pipeline benchmark (Decider vs Bedrock on the same classifier task)
+
+`scripts/benchmark.py`, 22 cases, output in `results/benchmark.json`:
+
+| | Decider 2B (local) | Bedrock LLM |
+|---|---|---|
+| latency p50 | 335.14 ms | 780.53 ms |
+| latency p95 | 377.02 ms | 2123.66 ms |
+| correct | 19/22 | 22/22 |
+| crisis recall | 6/8 | 8/8 |
+| API cost | $0 | not stated (no live price read) |
+
+Agreement: **19/22 (86.4%)**. Bedrock token totals: 2254 input / 286 output for 22 calls.
+
+Determinism: identical state gives identical output — the plan-with-means case returned P=0.313 on two consecutive calls.
 
 ## 6. Bedrock model ID — resolved
 
