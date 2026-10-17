@@ -108,17 +108,26 @@ class FakeSafetyChecker:
 
 
 class FakeResponder:
-    """Stands in for Responder; echoes the route so tests can assert on it."""
+    """Stands in for Responder; echoes the route so tests can assert on it.
+
+    It applies the real `append_support_line` helper, so agent-level tests see the
+    same support-line behaviour a real responder produces rather than a stub that
+    would silently hide a regression.
+    """
 
     def __init__(self) -> None:
         self.calls: list[tuple[str, str]] = []
 
     def respond(self, user_text: str, route_value: str, safety_note: str = ""):
         from crisis_triage.bedrock.responders import ResponderResult
+        from crisis_triage.resources import append_support_line
 
         self.calls.append((user_text, route_value))
         return ResponderResult(
-            text=f"[{route_value}] reply", latency_ms=800.0, input_tokens=120, output_tokens=40
+            text=append_support_line(f"[{route_value}] reply", route_value, user_text),
+            latency_ms=800.0,
+            input_tokens=120,
+            output_tokens=40,
         )
 
 
