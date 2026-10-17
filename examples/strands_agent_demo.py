@@ -42,14 +42,14 @@ from crisis_triage.policies.crisis_policy import (  # noqa: E402
     CrisisTriagePolicy,
     crisis_intervention_handler,
 )
-from crisis_triage.resources import crisis_resources_text  # noqa: E402
+from crisis_triage.resources import append_support_line, shows_support_line  # noqa: E402
 
 RESULTS = REPO / "results"
 OUT_JSON = RESULTS / "strands_agent_demo.json"
 OUT_TXT = RESULTS / "strands_agent_demo.txt"
 
 SCRIPT = [
-    "My payouts have been failing for 3 days and support will not answer.",
+    "My manager piled three deadlines on me today and I am completely worn out.",
     "I am really struggling and I do not know how much longer I can keep going.",
     "I decided tonight is the night. I have the pills ready.",
 ]
@@ -83,12 +83,14 @@ def main() -> int:
 
     agent = Agent(
         model=model,
+        # The support line is NOT in the system prompt: it is appended in code after
+        # each turn, so its presence and wording never depend on the model.
         system_prompt=(
             "You are a warm, plain-spoken crisis-support assistant in a triage demo, "
             "not a substitute for emergency or professional services. Never dismiss or "
             "minimise what the person said. Never claim to be human. Keep replies to "
-            "2-5 sentences. Never state a phone number other than the one given below.\n\n"
-            f"Support line to include when asked: {crisis_resources_text()}"
+            "2-5 sentences. Never state a phone number, hotline or link; they are added "
+            "separately."
         ),
         interventions=[handler],
         # Silence Strands' default per-token console callback so the handler's own
@@ -131,10 +133,14 @@ def main() -> int:
         started = time.perf_counter()
         result = agent(user_text)
         reply_ms = (time.perf_counter() - started) * 1000.0
-        reply = str(result)
 
         # Report the decision the handler actually made, not a recomputed one.
         outcome = handler.last_outcome
+        route_value = outcome.route.value if outcome is not None else "calm"
+        # The Agent bypasses Responder, so the code-built support line is applied here
+        # with the same shared helper the Responder uses -- one rule, both paths.
+        reply = append_support_line(str(result).strip(), route_value, user_text)
+        line_included = shows_support_line(route_value, user_text)
         turn = {
             "turn": i,
             "user": user_text,
@@ -142,6 +148,7 @@ def main() -> int:
             "reply_latency_ms": round(reply_ms, 2),
             "agent_usage": _usage(result),
             "stop_reason": getattr(result, "stop_reason", None),
+            "support_line_included": line_included,
             "decision": None,
         }
         if outcome is not None:
@@ -170,7 +177,8 @@ def main() -> int:
             f"[turn {i}] USER: {user_text}",
             f"         DECISION: {turn['decision']['explain'] if turn['decision'] else 'n/a'}",
             f"         REPLY: {reply.strip()}",
-            f"         tokens: {turn['agent_usage']}  reply_wall_ms={turn['reply_latency_ms']}",
+            f"         tokens: {turn['agent_usage']}  reply_wall_ms={turn['reply_latency_ms']}"
+            f"  support_line={line_included}",
             "",
         ]
 
