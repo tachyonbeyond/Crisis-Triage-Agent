@@ -1,0 +1,9 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+CLAUDE.md
+docs/HACKATHON.md
+docs/DECIDER.md
