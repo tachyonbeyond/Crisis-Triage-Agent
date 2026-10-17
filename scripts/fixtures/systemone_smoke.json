@@ -1,0 +1,41 @@
+{
+  "state": "I have been thinking about ending it. I have a plan and I bought what I need.",
+  "questions": {
+    "is_emergency": {
+      "type": "noul",
+      "instructions": "Does the latest message indicate a genuine emergency requiring immediate crisis resources?",
+      "criteria": {
+        "true": "Imminent danger to self or others, an active suicide/violence plan, or a medical emergency requiring 911",
+        "false": "Distressed, anxious, venting, seeking support, or discussing past events, but not in immediate danger"
+      }
+    },
+    "escalating": {
+      "type": "noul",
+      "instructions": "Compared with the earlier messages, is the situation becoming more dangerous?",
+      "criteria": {
+        "true": "Later messages show new intent, a plan, means, a timeline, or immediate danger not present earlier",
+        "false": "Stable or improving; no new risk signals"
+      }
+    },
+    "crisis_type": {
+      "type": "choice",
+      "instructions": "What type of crisis is this?",
+      "criteria": {
+        "suicide_self_harm": "Immediate risk of self-harm or suicide (plan, means, intent)",
+        "domestic_violence": "Active domestic violence, abuse, or intimate partner violence",
+        "medical_emergency": "Medical crisis requiring 911/ER (overdose, severe injury)",
+        "not_crisis": "Emotional distress but no immediate safety risk"
+      }
+    },
+    "urgency_level": {
+      "type": "score",
+      "instructions": "How urgent is the response needed?",
+      "criteria": [
+        "immediate: Seconds to minutes - life in danger right now",
+        "urgent: Minutes to hours - safety at risk soon",
+        "elevated: Needs professional help today, not life-threatening this moment",
+        "routine: Can wait for a scheduled appointment or standard support"
+      ]
+    }
+  }
+}
