@@ -114,11 +114,18 @@ route = CRISIS if any of:
 |---|---|---|
 | band only, `P >= 0.30` | 4/8 | 0/14 |
 | band OR escalation (the shipped OR rule) | **6/8** | 1/14 |
-| + Bedrock safety gate (the full pipeline) | **8/8** | — |
+| + Bedrock safety gate (the full pipeline) | **8/8** | **1/14** |
 
 The gate adds the two cases no threshold-and-escalation combination caught
 (`em_bridge_now`, `em_third_party_note`) — including one where the local model scored a person
-standing on a bridge at 0.1770. That is the concrete argument for the OR.
+standing on a bridge at 0.1770. That is the concrete argument for the OR. It contributes no false
+escalation of its own: the single false escalation in the full-pipeline row comes from the escalation
+signal (`edge_future_fear`, `p_escalating = 0.7101`), and the band-OR-escalation row already carries it.
+
+These rows are the output of one committed script rather than an assembly of separate measurements:
+`scripts/evaluate_pipeline.py` runs the production triage path over all 22 fixtures and writes
+[`results/pipeline_test_cases.json`](../results/pipeline_test_cases.json). The metric definitions, the
+per-signal table and the exact command are in [`docs/GROUND_TRUTH.md` §5c](GROUND_TRUTH.md).
 
 All of these were measured on the same 22 fixtures used to choose the thresholds and shape the
 safety prompt, so treat them as **optimistic** until a held-out set says otherwise.
@@ -133,8 +140,10 @@ State this plainly, because it is easy to design around the wrong mental model:
   decision.
 - Measured on 22 fixtures: the local model's p50 ranges from **159 to 335 ms** across runs of
   identical code (see GROUND_TRUTH §3); plan with ~335 ms. The **pipeline safety gate is
-  1064 ms p50 / 1813 ms p95**. The ~780–846 ms p50 figure sometimes quoted for Bedrock is the
-  *benchmark classifier*, which uses a much shorter prompt than the safety gate.
+  1064 ms p50 / 1813 ms p95** — now reproducible, not just an inline measurement: GROUND_TRUTH §5c
+  records a committed-script run at 1142 ms p50 / 1977 ms p95 and 256.5 in / 46.0 out tokens per call.
+  The ~780–846 ms p50 figure sometimes quoted for Bedrock is the *benchmark classifier*, which uses a
+  much shorter prompt than the safety gate.
 - What the local model buys is a cheap, local, per-turn **tone and escalation** signal that
   decides how the reply is framed — not a way to skip the gate. A design that used it as a
   pre-filter to skip the safety call exists only as an untested hypothesis in our notes; we did
@@ -222,5 +231,7 @@ must not be wrong.
 | `src/crisis_triage/policies/crisis_policy.py` | crisis config, the safety OR, the handler |
 | `src/crisis_triage/bedrock/safety_check.py` | the independent safety gate |
 | `scripts/sweep_fixtures.py` | measures the distribution you must tune against |
+| `scripts/evaluate_pipeline.py` | runs the full pipeline over the fixtures; writes the contribution table above |
 | `examples/strands_agent_demo.py` | the pattern inside a real `Agent` |
+| `results/pipeline_test_cases.json` | per-case output of that run — the source of the rows above |
 | `docs/GROUND_TRUTH.md` | every measured number, with its command |
