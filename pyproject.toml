@@ -27,8 +27,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=9.0"]
 
-# Pitfall 9 in docs/HACKATHON.md: importing the orchestrator from the package
-# __init__ caused a RuntimeWarning under `python -m`. A console entry point avoids it.
 [project.scripts]
 crisis-triage = "crisis_triage.main:main"
 
@@ -40,7 +38,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Markers let live-server tests be deselected so CI runs with no Decider server.
+
 markers = [
     "live: requires a running Decider server on :8000 (deselect with -m 'not live')",
 ]
