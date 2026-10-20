@@ -76,6 +76,8 @@ Every question for one turn is sent in a **single** request so the server shares
 
 `state` is the last `max_turns` (default 6) **user** turns only, oldest first, labelled so the `escalating` question has something to compare against. The agent's own replies and its injected routing directives are **not** part of the state.
 
+The block above is abridged. The real request sends **four** questions, each with a `criteria` block, and these two are the ones that drive routing; `crisis_type` and `urgency_level` are sent for context and reported in the demo but never used in the routing decision. The complete, verbatim payload is [`scripts/fixtures/systemone_smoke.json`](scripts/fixtures/systemone_smoke.json).
+
 ### The three routes
 
 ```
