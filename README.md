@@ -18,7 +18,7 @@
 - [Safety Behaviour](#safety-behaviour)
 - [Measured Results](#measured-results)
 - [Limitations](#limitations)
-- [Builder Center Article](#builder-center-article)
+- [AWS Builder Center](#aws-builder-center)
 
 ## Project Overview
 
@@ -257,6 +257,10 @@ All numbers below trace to `results/`. Hardware: **Windows 11, RTX 4060 Ti 16 GB
 - Thresholds (`CRISIS_HIGH=0.30`, `CRISIS_LOW=0.15`, `CRISIS_ESC=0.70`) control **tone only**. They are not a safety boundary; the OR is.
 - The safety check adds **p50 ~1.1 s**, and the turn's total is that plus Decider and the reply generation. That latency is the price of not letting a compressed probability decide whether someone gets help.
 - Fixtures are 22 scripted cases, **not a clinical evaluation**. Edge cases (passive ideation, past self-harm with no current intent, future fear) are included deliberately.
+
+## AWS Builder Center
+
+This project was meant to be a submission for a [AWS Builder Hackathon](https://builder.aws.com/build/hackathons/4f50957c-1d08-37ab-b11c-97516b9adeb4/agent-experience-hackathon-strands-decider), I was too late to polish the project and create a video for it and missed the deadline. So, feel free to snoop around :)
 
 ## License
 
