@@ -260,7 +260,7 @@ All numbers below trace to `results/`. Hardware: **Windows 11, RTX 4060 Ti 16 GB
 
 ## AWS Builder Center
 
-This project was meant to be a submission for a [AWS Builder Hackathon](https://builder.aws.com/build/hackathons/4f50957c-1d08-37ab-b11c-97516b9adeb4/agent-experience-hackathon-strands-decider), I was too late to polish the project and create a video for it and missed the deadline. So, feel free to snoop around :)
+This project was meant to be a submission for an [AWS Builder Hackathon](https://builder.aws.com/build/hackathons/4f50957c-1d08-37ab-b11c-97516b9adeb4/agent-experience-hackathon-strands-decider), I was too late to polish the project and create a video for it and missed the deadline. So, feel free to snoop around :)
 
 ## License
 
